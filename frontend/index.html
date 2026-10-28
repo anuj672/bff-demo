@@ -32,8 +32,7 @@
   <pre id="out">Log in, then click a button…</pre>
 
   <script>
-    const BFF = "http://localhost:8000";
-    const BACKEND = "http://localhost:9000";
+    const BFF = "";
     const out = document.getElementById("out");
     const status = document.getElementById("status");
 
@@ -66,7 +65,6 @@
     document.getElementById("list").onclick = () => request(BFF + "/api/items");
     document.getElementById("one").onclick = () =>
       request(BFF + "/api/items/" + encodeURIComponent(document.getElementById("itemId").value));
-    document.getElementById("direct").onclick = () => request(BACKEND + "/items");
      document.getElementById("who").onclick = () => request(BFF + "/api/whoami");
 
     refreshStatus();

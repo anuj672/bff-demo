@@ -10,6 +10,7 @@ from fastapi import Depends, FastAPI, HTTPException, Path, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.staticfiles import StaticFiles
 
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:9000")
 OIDC_CLIENT_ID = os.environ["OIDC_CLIENT_ID"]
@@ -17,8 +18,8 @@ OIDC_CLIENT_SECRET = os.environ["OIDC_CLIENT_SECRET"]    # secret for the IdP
 OIDC_DISCOVERY_URL = os.environ["OIDC_DISCOVERY_URL"]
 SESSION_SECRET = os.environ["SESSION_SECRET"]            # signs the short-lived login-state cookie
 REDIRECT_URI = os.environ.get("OIDC_REDIRECT_URI", "http://localhost:8000/auth/callback")
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:8080")
-ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", FRONTEND_URL)
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "/")
+ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "http://localhost:8000")
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"  # true on HTTPS
 SESSION_TTL = 15 * 60  # seconds
 RATE_LIMIT = 30
@@ -159,3 +160,9 @@ async def get_item(request: Request, item_id: int = Path(ge=1, le=10000),
                    session: dict = Depends(require_session)):
     check_rate_limit(request)
     return await call_backend(f"/items/{item_id}", session["tokens"]["access_token"])
+
+app.mount(
+    "/",
+    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "frontend"), html=True),
+    name="frontend",
+)
