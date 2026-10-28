@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BFF Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    button { margin: 0 .5rem .5rem 0; padding: .5rem .9rem; cursor: pointer; }
+    input { padding: .4rem; }
+    pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; min-height: 5rem; white-space: pre-wrap; }
+    #status { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>BFF Demo</h1>
+  <p>This page never contains an API key or token. It only calls the BFF.</p>
+  <p>Status: <span id="status">checking…</span></p>
+
+  <div>
+    <button id="login">Log in with Asgardeo</button>
+    <button id="logout">Log out</button>
+  </div>
+
+  <div>
+    <button id="list">Get all items</button>
+    <input id="itemId" type="number" value="1" min="1" style="width:4rem">
+    <button id="one">Get one item</button>
+    <button id="direct">Call backend directly (should fail)</button>
+    <button id="who">Who am I (via backend)</button>
+  </div>
+
+  <pre id="out">Log in, then click a button…</pre>
+
+  <script>
+    const BFF = "http://localhost:8000";
+    const BACKEND = "http://localhost:9000";
+    const out = document.getElementById("out");
+    const status = document.getElementById("status");
+
+    async function request(url, options = {}) {
+      out.textContent = "Loading…";
+      try {
+        const res = await fetch(url, { credentials: "include", ...options });
+        out.textContent = res.status + " " + res.statusText + "\n\n" + await res.text();
+        return res;
+      } catch (err) {
+        out.textContent = "Request blocked or failed: " + err.message +
+          "\n(Open DevTools > Console to see why.)";
+      }
+    }
+
+    async function refreshStatus() {
+      try {
+        const res = await fetch(BFF + "/auth/me", { credentials: "include" });
+        status.textContent = res.ok ? "logged in as " + (await res.json()).user : "logged out";
+      } catch { status.textContent = "BFF unreachable"; }
+    }
+
+    document.getElementById("login").onclick = () => {
+      window.location.href = BFF + "/auth/login";   // full-page redirect to the IdP
+    };
+    document.getElementById("logout").onclick = async () => {
+      await request(BFF + "/auth/logout", { method: "POST" });
+      refreshStatus();
+    };
+    document.getElementById("list").onclick = () => request(BFF + "/api/items");
+    document.getElementById("one").onclick = () =>
+      request(BFF + "/api/items/" + encodeURIComponent(document.getElementById("itemId").value));
+    document.getElementById("direct").onclick = () => request(BACKEND + "/items");
+     document.getElementById("who").onclick = () => request(BFF + "/api/whoami");
+
+    refreshStatus();
+  </script>
+</body>
+</html>
