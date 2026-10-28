@@ -53,11 +53,19 @@ Serving the frontend from the BFF keeps the page and the API on one origin, so t
 
 ## Screenshots
 
-<!-- Add images to a docs/ folder and reference them here. Hide user IDs and client IDs. -->
-- Logged-in page with data returned
-- `session` cookie flagged HttpOnly and Secure
-- Network tab: `/api/items` request carrying only the cookie (no token or API key)
-- Direct backend call without a token returning `401`
+## Screenshots
+
+**Logged in through Asgardeo, data returned via the BFF (live on Azure)**
+![Logged in](docs/1.png)
+
+**The `session` cookie is HttpOnly and Secure, so JavaScript cannot read it**
+![Session cookie](docs/2.png)
+
+**Login flow in the Network tab: BFF redirects to the IdP, the IdP returns a one-time code to the BFF callback, then the API calls succeed**
+![Login flow](docs/3.png)
+
+**After logout the session is gone and the status returns to logged out**
+![Logout](docs/4.png)
 
 ## Run it locally
 
